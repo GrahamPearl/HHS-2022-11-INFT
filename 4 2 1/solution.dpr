@@ -22,7 +22,9 @@ const
 
 var
   iTest: Int64;
-  min, max: Int64;
+  min, max, incBy : Int64;
+  updateBy : String;
+
   tf: Textfile;
 
 { ==============================================================================
@@ -96,11 +98,55 @@ end;
 { ==============================================================================
 }
 
+procedure noneParameters();
 begin
-  try
     WriteLN('Testing 3x+1 terminates in 4 2 1 pattern');
     Write('Enter Min: ');    ReadLN(min);
     Write('Enter Max: ');    ReadLN(max);//1607795;
+end;
+
+function getInt64FromParam(data : String): Int64;
+Begin
+  delete(data,1,4);
+  result := StrToInt64(data);
+End;
+
+function getStringFromParam(data, code : String): String;
+Begin
+  delete(data,1,Length(code));
+  result := data;
+End;
+
+procedure someParameters();
+var iLoop : Integer;
+    cmd : String;
+begin
+  for iLoop := 1 to ParamCount do begin
+    cmd := lowercase(ParamStr(iLoop));
+    WriteLN('Applying: ',cmd);
+    if (POS('min=',cmd) > 0) then min := getInt64FromParam(ParamStr(iLoop));
+    if (POS('max=',cmd) > 0) then max := getInt64FromParam(ParamStr(iLoop));
+    if (POS('inc=',cmd) > 0) then incBy := getInt64FromParam(ParamStr(iLoop));
+    if (POS('apply=',cmd) > 0) then updateBy := getStringFromParam(ParamStr(iLoop),'apply=');
+
+  end;
+    WriteLN('Testing: ', min ,' to ',max);
+end;
+{ ==============================================================================
+}
+
+begin
+  try
+  min := 1;
+  max := 100;
+  incBy := 1;
+  updateBy := '+';
+
+    If (ParamCount = 0)
+  Then noneParameters()
+  Else someParameters();
+
+
     last := 0;
 
     Write('Testing: ');
@@ -110,13 +156,15 @@ begin
 
       showProgressBar();
 
-      AssignFile(tf, '.\Test Data\test' + IntToStr(iTest) + '.txt');
+      AssignFile(tf, '\\pearl\INFT11\Test Data\test' + IntToStr(iTest) + '.txt');
       Rewrite(tf);
 
       WriteLN(tf, 'Testing: ', iTest, ' = ', endsWITH(iTest, endOn));
       CloseFile(tf);
 
-      iTest := iTest * 10;
+      if updateBy = '+' then iTest := iTest + incBy else
+      if updateBy = '*' then iTest := iTest * incBy;
+
     end;
     WriteLN;
     WriteLN('Application Run Successfully');
