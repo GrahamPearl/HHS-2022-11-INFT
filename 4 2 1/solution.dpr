@@ -21,26 +21,26 @@ const
   endOn = ' 4 2 1';
 
 var
-  iTest: Integer;
-  min, max: Integer;
+  iTest: Int64;
+  min, max: Int64;
   tf: Textfile;
 
 { ==============================================================================
 }
 
-function getNext(valueX: Integer): Integer;
+function getNext(valueX: Int64): Int64;
 begin
   result := 3 * valueX + 1;
 end;
 
-function EVEN(valueX: Integer): Boolean;
+function EVEN(valueX: Int64): Boolean;
 begin
   result := NOT ODD(valueX);
 end;
 
-function endsWITH(startX: Integer; endOn: String): Boolean;
+function endsWITH(startX: Int64; endOn: String): Boolean;
 var
-  iAm: Integer;
+  iAm: Int64;
   route: String;
 begin
   iAm := startX;
@@ -70,9 +70,9 @@ end;
 { ==============================================================================
 }
 
-function calculatePercentage(value: Integer): Integer;
+function calculatePercentage(value: Int64): Integer;
 begin
-  result := Round((value / max - min + 1) * 100);
+  result := Round((value / (max - min + 1)) * 100);
 end;
 
 var
@@ -80,11 +80,14 @@ var
   last: Integer;
 
 procedure showProgressBar();
+var loop, completed : Integer;
 begin
   status := '';
-  if last < calculatePercentage(iTest) then
+  completed := calculatePercentage(iTest);
+  if last < completed then
   begin
-    status := '#';
+    for loop := last to completed do
+        status := status+'#';
     last := calculatePercentage(iTest);
   end;
   Write(status);
@@ -95,20 +98,25 @@ end;
 
 begin
   try
-    min := 1;
-    max := 100;
+    WriteLN('Testing 3x+1 terminates in 4 2 1 pattern');
+    Write('Enter Min: ');    ReadLN(min);
+    Write('Enter Max: ');    ReadLN(max);//1607795;
     last := 0;
 
     Write('Testing: ');
-    for iTest := min to max do
+    iTest := min;
+    WHILE iTest <= max do
     begin
 
       showProgressBar();
 
       AssignFile(tf, '.\Test Data\test' + IntToStr(iTest) + '.txt');
       Rewrite(tf);
+
       WriteLN(tf, 'Testing: ', iTest, ' = ', endsWITH(iTest, endOn));
       CloseFile(tf);
+
+      iTest := iTest * 10;
     end;
     WriteLN;
     WriteLN('Application Run Successfully');
